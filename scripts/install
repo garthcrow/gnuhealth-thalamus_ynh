@@ -1,0 +1,55 @@
+#!/bin/bash
+set -eu
+source /usr/share/yunohost/helpers
+source ./scripts/_common.sh
+
+ynh_script_progression --message="Préparation de l'installation"
+
+# Variables fournies par YunoHost : $app, $domain, $path, $install_dir etc.
+
+# 1) Créer l'arborescence et l'utilisateur système
+ynh_script_progression --message="Création utilisateur système et répertoires"
+ynh_system_user_create --username="$app" --home_dir="$install_dir"
+mkdir -p "$install_dir" "$install_dir/app" "$install_dir/run" "$install_dir/logs"
+chown -R "$app":"$app" "$install_dir"
+
+# 2) Environnement Python (venv) + Thalamus
+ynh_script_progression --message="Installation de Thalamus (venv/pip)"
+ynh_exec_as_app python3 -m venv "$install_dir/venv"
+ynh_exec_as_app bash -lc "$install_dir/venv/bin/pip install --upgrade pip wheel"
+ynh_exec_as_app bash -lc "$install_dir/venv/bin/pip install thalamus flask-cors"
+
+# 3) PostgreSQL : créer DB + droits utilisateur système
+ynh_script_progression --message="Initialisation PostgreSQL"
+# Crée l'utilisateur DB portant le même nom que $app si absent
+sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname='$app'" | grep -q 1 || sudo -u postgres createuser --createdb --no-createrole --no-superuser "$app"
+# Crée la base si absente
+sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='$thalamus_db'" | grep -q 1 || sudo -u postgres createdb -O "$app" "$thalamus_db"
+
+# 4) Fichier de config Thalamus (Jinja → conf)
+POSTGRESQL_URI="dbname='$thalamus_db' user='$app'"
+export POSTGRESQL_URI
+ynh_config_add --jinja --template="thalamus.cfg.j2" --destination="$install_dir/thalamus.cfg"
+chown "$app":"$app" "$install_dir/thalamus.cfg"
+
+# 5) Lanceur WSGI minimal pour uWSGI
+cat > "$install_dir/app/run_thalamus.py" <<'PY'
+from thalamus import app  # WSGI callable
+PY
+chown -R "$app":"$app" "$install_dir/app"
+
+# 6) uWSGI ini + service systemd
+ynh_config_add --template="thalamus_uwsgi.ini" --destination="$install_dir/thalamus_uwsgi.ini"
+ynh_config_add --template="thalamus.service" --destination="/etc/systemd/system/$app.service"
+
+# 7) Nginx (reverse proxy)
+ynh_script_progression --message="Configuration Nginx"
+ynh_add_nginx_config
+
+# 8) Démarrer le service
+ynh_script_progression --message="Démarrage du service"
+systemctl daemon-reload
+systemctl enable --now "$app"
+
+# 9) Fin
+ynh_script_progression --message="Installation terminée"

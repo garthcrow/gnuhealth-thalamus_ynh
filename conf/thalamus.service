@@ -1,0 +1,14 @@
+[Unit]
+Description=GNU Health Thalamus (YunoHost)
+After=network.target postgresql.service
+
+[Service]
+User=__APP__
+Group=__APP__
+WorkingDirectory=__INSTALL_DIR__
+Environment="THALAMUS_CONFIG=__INSTALL_DIR__/thalamus.cfg"
+ExecStart=/bin/bash -lc '__INSTALL_DIR__/venv/bin/uwsgi --ini __INSTALL_DIR__/thalamus_uwsgi.ini'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

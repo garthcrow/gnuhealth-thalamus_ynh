@@ -1,0 +1,3 @@
+Cette application YunoHost installe et expose **GNU Health Thalamus**, le serveur REST de la Fédération GNU Health. Elle est destinée à servir de backend à **MyGNUHealth** (client PHR). L'appli crée un utilisateur système dédié, une base PostgreSQL, configure uWSGI et publie le service derrière Nginx avec TLS via YunoHost.
+
+**Avertissement** : MyGNUHealth reste une application *client* (desktop/mobile) à installer sur vos appareils. Cette app YunoHost n'installe pas MyGNUHealth sur le serveur.

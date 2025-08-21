@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eu
+source /usr/share/yunohost/helpers
+source ./scripts/_common.sh
+
+# Fichiers / conf
+ynh_backup --src_path="$install_dir"
+# Dump DB
+ynh_psql_dump_db "$thalamus_db" > "$YNH_BACKUP_DIR/$app-postgres.sql"

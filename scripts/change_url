@@ -1,0 +1,6 @@
+#!/bin/bash
+set -eu
+source /usr/share/yunohost/helpers
+# Gère le déplacement du vhost Nginx
+ynh_change_url_nginx_config
+systemctl reload nginx

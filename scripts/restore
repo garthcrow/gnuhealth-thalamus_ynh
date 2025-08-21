@@ -1,0 +1,13 @@
+#!/bin/bash
+set -eu
+source /usr/share/yunohost/helpers
+source ./scripts/_common.sh
+
+# Restaurer fichiers
+ynh_restore_file --src_path="$install_dir"
+# Restaurer DB
+sudo -u postgres createdb -O "$app" "$thalamus_db" || true
+sudo -u postgres psql "$thalamus_db" < "$YNH_BACKUP_DIR/$app-postgres.sql"
+
+systemctl daemon-reload
+systemctl enable --now "$app"

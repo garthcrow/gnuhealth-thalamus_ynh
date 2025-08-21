@@ -1,0 +1,8 @@
+#!/bin/bash
+set -eu
+source /usr/share/yunohost/helpers
+source ./scripts/_common.sh
+
+# Exemple : remettre à jour thalamus dans le venv
+ynh_exec_as_app bash -lc "$install_dir/venv/bin/pip install --upgrade thalamus flask-cors"
+systemctl restart "$app"

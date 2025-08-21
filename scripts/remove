@@ -1,0 +1,20 @@
+#!/bin/bash
+set -eu
+source /usr/share/yunohost/helpers
+source ./scripts/_common.sh
+
+# Arrêter et supprimer service
+ynh_remove_systemd_config
+
+# Supprimer conf Nginx
+ynh_remove_nginx_config
+
+# Supprimer DB postgres
+sudo -u postgres dropdb --if-exists "$thalamus_db" || true
+sudo -u postgres dropuser --if-exists "$app" || true
+
+# Supprimer fichiers
+ynh_secure_remove --file="$install_dir"
+
+# Supprimer utilisateur système
+ynh_system_user_delete --username="$app"
