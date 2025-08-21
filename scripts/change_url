@@ -1,4 +1,13 @@
 #!/bin/bash
+set -eu -o pipefail
+
+# helpers YunoHost
+source /usr/share/yunohost/helpers
+
+# chemin absolu du dossier scripts/
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/_common.sh"
+
 set -eu
 source /usr/share/yunohost/helpers
 # Gère le déplacement du vhost Nginx
