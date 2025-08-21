@@ -2,7 +2,7 @@
 
 # gnuhealth-thalamus_ynh (squelette)
 ## Arborescence
-
+```md
 gnuhealth-thalamus_ynh/
 ├─ manifest.toml
 ├─ scripts/
@@ -22,7 +22,7 @@ gnuhealth-thalamus_ynh/
 │  ├─ DESCRIPTION.md
 │  └─ DESCRIPTION_fr.md
 └─ README.md
-
+```
 ### Installation locale de test
 
 ```bash
